@@ -1,5 +1,6 @@
 "use client"
 
+import { Suspense } from "react"
 import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { ChevronLeft, Search, Check, MapPin } from "lucide-react"
@@ -19,11 +20,10 @@ const metroStations = [
   { id: 10, name: "Raidurg", line: "Blue", lineColor: "#0066CC", distance: "18.2 km" },
 ]
 
-export default function MetroStationScreen() {
+function MetroStationContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const type = searchParams.get("type") || "boarding" // "boarding" or "destination"
-  
+  const type = searchParams.get("type") || "boarding"
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedStation, setSelectedStation] = useState<number | null>(null)
 
@@ -43,57 +43,30 @@ export default function MetroStationScreen() {
 
   return (
     <MobileFrame className="bg-[#F8F9FF]">
-      {/* Header */}
       <header className="sticky top-0 z-10 bg-[#F8F9FF] px-5 py-4">
-        <button 
-          onClick={() => router.back()}
-          className="flex items-center gap-2 text-[#1A1B1F]"
-        >
+        <button onClick={() => router.back()} className="flex items-center gap-2 text-[#1A1B1F]">
           <ChevronLeft className="h-6 w-6" />
         </button>
       </header>
-
-      {/* Content */}
       <div className="px-5 pb-32">
         <h1 className="text-2xl font-bold text-[#1A1B1F] leading-tight">
           {isBoarding ? "Select Boarding Metro Station" : "Select Destination Metro Station"}
         </h1>
         <p className="mt-2 text-[#43474F] text-base leading-relaxed">
-          {isBoarding 
-            ? "Choose the station you'll board from each morning"
-            : "Choose the station closest to your destination"
-          }
+          {isBoarding ? "Choose the station you'll board from each morning" : "Choose the station closest to your destination"}
         </p>
-
-        {/* Search */}
         <div className="mt-6 relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#747780]" />
-          <input
-            type="text"
-            placeholder="Search station name or area"
-            value={searchQuery}
+          <input type="text" placeholder="Search station name or area" value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-12 pl-12 pr-4 rounded-xl border border-[#C4C6D0] bg-white text-[#1A1B1F] placeholder:text-[#747780] focus:outline-none focus:ring-2 focus:ring-[#18E3A4] focus:border-transparent"
-          />
+            className="w-full h-12 pl-12 pr-4 rounded-xl border border-[#C4C6D0] bg-white text-[#1A1B1F] placeholder:text-[#747780] focus:outline-none focus:ring-2 focus:ring-[#18E3A4] focus:border-transparent" />
         </div>
-
-        {/* Popular Stations */}
         <div className="mt-6">
-          <p className="text-sm font-medium text-[#747780] uppercase tracking-wide mb-3">
-            Popular Stations
-          </p>
-          
+          <p className="text-sm font-medium text-[#747780] uppercase tracking-wide mb-3">Popular Stations</p>
           <div className="space-y-3">
             {filteredStations.map((station) => (
-              <button
-                key={station.id}
-                onClick={() => setSelectedStation(station.id)}
-                className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all ${
-                  selectedStation === station.id
-                    ? "border-[#18E3A4] bg-[#18E3A4]/5"
-                    : "border-[#C4C6D0]/30 bg-white hover:border-[#18E3A4]/50"
-                }`}
-              >
+              <button key={station.id} onClick={() => setSelectedStation(station.id)}
+                className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all ${selectedStation === station.id ? "border-[#18E3A4] bg-[#18E3A4]/5" : "border-[#C4C6D0]/30 bg-white hover:border-[#18E3A4]/50"}`}>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-[#F8F9FF] flex items-center justify-center">
                     <MapPin className="h-5 w-5 text-[#001736]" />
@@ -101,17 +74,11 @@ export default function MetroStationScreen() {
                   <div className="text-left">
                     <p className="font-semibold text-[#1A1B1F]">{station.name}</p>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span 
-                        className="px-2 py-0.5 rounded text-xs font-medium text-white"
-                        style={{ backgroundColor: station.lineColor }}
-                      >
-                        {station.line} Line
-                      </span>
+                      <span className="px-2 py-0.5 rounded text-xs font-medium text-white" style={{ backgroundColor: station.lineColor }}>{station.line} Line</span>
                       <span className="text-sm text-[#747780]">{station.distance}</span>
                     </div>
                   </div>
                 </div>
-                
                 {selectedStation === station.id && (
                   <div className="w-6 h-6 rounded-full bg-[#18E3A4] flex items-center justify-center">
                     <Check className="h-4 w-4 text-[#001736]" strokeWidth={3} />
@@ -122,17 +89,19 @@ export default function MetroStationScreen() {
           </div>
         </div>
       </div>
-
-      {/* Bottom CTA */}
       <div className="fixed bottom-0 left-0 right-0 max-w-[390px] mx-auto px-5 py-4 bg-white border-t border-[#C4C6D0]">
-        <MintButton 
-          onClick={handleConfirm}
-          disabled={!selectedStation}
-          showArrow
-        >
+        <MintButton onClick={handleConfirm} disabled={!selectedStation} showArrow>
           Confirm This Station
         </MintButton>
       </div>
     </MobileFrame>
+  )
+}
+
+export default function MetroStationScreen() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-screen bg-[#F8F9FF]"><div className="w-8 h-8 border-2 border-[#18E3A4] border-t-transparent rounded-full animate-spin" /></div>}>
+      <MetroStationContent />
+    </Suspense>
   )
 }
